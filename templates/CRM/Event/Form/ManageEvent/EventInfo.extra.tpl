@@ -27,16 +27,16 @@
 <br/>
 <div id="registration-urls-with-different-participant-role" class="crm-accordion-wrapper">
   <div class="crm-accordion-header">
-    Registration URLs for Participant Roles
+    Registration URLs based on Participant Roles
   </div><!-- /.crm-accordion-header -->
   <div id="Event_Invoice_Settings" class="crm-accordion-body">
-    <table border="1" cellpadding="5" cellspacing="5">
+    <table border="1" cellpadding="5" cellspacing="5" id="mapping">
       <thead></thead>
       <tbody>
         {foreach from=$allParticipantRoles key=k item=v}
         <tr>
           <td>{$v} - </td>
-          <td>{crmURL a=1 fe=1 p='civicrm/event/register' q="reset=1&id=`$eventID`&participantrole="}{$k|md5}</td>
+          <td class="tooltip" title="Click on url to copy!">{crmURL a=1 fe=1 p='civicrm/event/register' q="reset=1&id=`$eventID`&participantrole="}{$k|md5}</td>
         </tr>
         {/foreach}
       </tbody>
@@ -47,8 +47,43 @@
 </div>
 {/if}
 {literal}
+  <style type="text/css">
+    .ui-tooltip {
+      padding: 3px 5px;
+      color: #32414F;
+      border-radius: 20px;
+      font-size: 12px;
+      box-shadow: 0 0 7px black;
+    }
+  </style>
   <script type="text/javascript">
+  /** Function to select the text on click**/
+  function selectCellText(e) {
+    e = e || window.event;
+    var obj = e.target || e.srcElement;
+    if ( obj.nodeName.toLowerCase() === 'td' ) {
+      if (document.selection) {
+        var range = document.body.createTextRange();
+        range.moveToElementText(obj);
+        range.select();
+      }
+      else if (window.getSelection) {
+        var range = document.createRange();
+        range.selectNode(obj.firstChild);
+        window.getSelection().addRange(range);
+      }
+    }
+  }
+  function init() {
+    document.getElementById('mapping').onclick = selectCellText;
+  }
+
   cj(document).ready(function() {
+    init();
+    cj("#mapping > tbody > tr > td.tooltip").tooltip();
+    cj("#mapping > tbody > tr > td.tooltip").click(function() {
+      cj(".ui-tooltip-content").parents('div').remove();
+    });
     cj("#registration-urls-with-different-participant-role").appendTo("#EventInfo > div.crm-event-manage-eventinfo-form-block > table > tbody > tr > td > strong");
     cj.unique( "#registration-urls-with-different-participant-role" );
   });
