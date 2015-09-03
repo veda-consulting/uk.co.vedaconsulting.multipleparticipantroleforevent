@@ -117,6 +117,31 @@ function multipleparticipantroleforevent_civicrm_buildForm($formName, &$form) {
       if ($formName == 'CRM_Event_Form_ManageEvent_EventInfo') {
         $form->assign("allParticipantRoles", $allParticipantRoles);
         $form->assign("eventID", $form->_id);
+
+        /*Get price set id by event ID*/
+        if ($form->_id) {
+          $priceSetId = CRM_Core_DAO::getFieldValue('CRM_Price_DAO_PriceSetEntity', $form->_id, 'price_set_id', 'entity_id');
+          if ($priceSetId) {
+            $priceFieldId = CRM_Core_DAO::getFieldValue('CRM_Price_DAO_PriceField', $priceSetId, 'id', 'price_set_id');
+            $sql = "SELECT id, amount
+   FROM civicrm_price_field_value
+   WHERE price_field_id = %1
+   AND is_active = 1";
+            $params = array(
+              1 => array($priceFieldId, 'Integer'),
+            );
+            $result   = CRM_Core_DAO::executeQuery($sql, $params);
+            $priceFieldValues = array();
+            while ($result->fetch()) {
+              $priceFieldValues[md5($result->id)] = $result->amount;
+            }
+            if (!empty($priceFieldValues)) {
+              $isPricePresent = 1;
+              $form->assign("isPricePresent", $isPricePresent);
+              $form->assign("priceFieldValues", $priceFieldValues);
+            }
+          }
+        }
       } else {
         $participantrole = '';
         $participantroleHashed = CRM_Utils_Request::retrieve('participantrole', 'String', $form);
@@ -137,4 +162,46 @@ function multipleparticipantroleforevent_civicrm_buildForm($formName, &$form) {
         }
       }
    }
+}
+
+/**
+ * Implementation of buildAmount hook
+ * To modify the priceset on the basis of participant role/price field id provided from the url
+ */
+function multipleparticipantroleforevent_civicrm_buildAmount($pageType, &$form, &$amount) {
+  if ($pageType == 'event') {
+    $priceSetId = $form->get( 'priceSetId' );
+
+    //Apply discounted price only if there is any "participantrole" in url
+    $participantrole = '';
+    $participantroleHashed = CRM_Utils_Request::retrieve('participantrole', 'String', $form);
+    $allParticipantRoles    = CRM_Event_PseudoConstant::participantRole();
+    foreach($allParticipantRoles as $roleId => $roleName) {
+      if (md5($roleId) == $participantroleHashed) {
+        $participantrole = $roleId;
+        break;
+      }
+    }
+
+    $pricesetFieldIdHashed = CRM_Utils_Request::retrieve('fieldid', 'String', $form);
+    if (isset($participantrole) && !empty($participantrole) && isset($pricesetFieldIdHashed) && !empty($pricesetFieldIdHashed)) {
+      if ( !empty( $priceSetId ) ) {
+        $feeBlock =& $amount;
+        foreach( $feeBlock as &$fee ) {
+          if ( !is_array( $fee['options'] ) ) {
+            continue;
+          }
+          foreach ( $fee['options'] as $key => &$option ) {
+            if (md5($key) == $pricesetFieldIdHashed) {
+              $option['is_default'] = 1;
+              continue;
+            }
+            else {
+              unset($fee['options'][$key]);
+            }
+          }
+        }
+      }
+    }
+  }
 }
