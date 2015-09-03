@@ -36,11 +36,28 @@
         {foreach from=$allParticipantRoles key=k item=v}
         <tr>
           <td>{$v} - </td>
-          <td class="tooltip" title="Click on url to copy!">{crmURL a=1 fe=1 p='civicrm/event/register' q="reset=1&id=`$eventID`&participantrole="}{$k|md5}</td>
+          <td class="tooltip" title="Click on url to copy!">{crmURL a=1 fe=1 p='civicrm/event/register' q="reset=1&id=`$eventID`&participantrole="}{$k|md5}
+          </td>
         </tr>
         {/foreach}
       </tbody>
     </table>
+    {if $isPricePresent}
+      <table border="1" cellpadding="5" cellspacing="5">
+        <thead>
+          <th>Event Amount</th>
+          <th>Query String</th>
+        </thead>
+        <tbody>
+          {foreach from=$priceFieldValues key=hashedPrice item=amount}
+            <tr>
+              <td>{$amount}</td>
+              <td class="tooltip" title="Click on query string to copy!">&fieldid={$hashedPrice}</td>
+            </tr>
+          {/foreach}
+        </tbody>
+      </table>
+    {/if}
     <ul>
   </ul>
   </div>
