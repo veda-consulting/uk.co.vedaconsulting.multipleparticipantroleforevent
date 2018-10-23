@@ -23,7 +23,7 @@
  | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
  +--------------------------------------------------------------------+
 *}
-{if $eventID}
+{if $eventID && $isForm}
 <br/>
 <div id="registration-urls-with-different-participant-role" class="crm-accordion-wrapper">
   <div class="crm-accordion-header">
@@ -45,7 +45,6 @@
   </ul>
   </div>
 </div>
-{/if}
 {literal}
   <style type="text/css">
     .ui-tooltip {
@@ -85,8 +84,11 @@
       cj(".ui-tooltip-content").parents('div').remove();
     });
     cj("#registration-urls-with-different-participant-role").appendTo("#EventInfo > div.crm-event-manage-eventinfo-form-block > table > tbody > tr > td > strong");
-    cj.unique( "#registration-urls-with-different-participant-role" );
+    //MV #8072, Using unique returns TypeError on Event contfiguration page.
+    // cj.unique( "#registration-urls-with-different-participant-role" );
+    //use of unique is to remove all duplciates (if any), to achieve this using nextall and remove instead of unique.
+    cj("#registration-urls-with-different-participant-role").nextAll().remove();
   });
 </script>
 {/literal}
-
+{/if}
