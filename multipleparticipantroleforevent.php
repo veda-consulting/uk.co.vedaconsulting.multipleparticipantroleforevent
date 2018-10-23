@@ -113,10 +113,19 @@ function multipleparticipantroleforevent_civicrm_alterSettingsFolders(&$metaData
 function multipleparticipantroleforevent_civicrm_buildForm($formName, &$form) {
   if ($formName == 'CRM_Event_Form_Registration_Register' || $formName == 'CRM_Event_Form_Registration_Confirm' || $formName == 'CRM_Event_Form_ManageEvent_EventInfo') {
 
+
       $allParticipantRoles    = CRM_Event_PseudoConstant::participantRole();
       if ($formName == 'CRM_Event_Form_ManageEvent_EventInfo') {
         $form->assign("allParticipantRoles", $allParticipantRoles);
         $form->assign("eventID", $form->_id);
+        
+        //MV #9429 EventInfo.extra.tpl has been used in other extensions, so better have custom tpl
+        //and inject into page-body to avoid conflicts
+        $templatePath = realpath(dirname(__FILE__)."/templates");
+        // dynamically insert a template block in the page
+        CRM_Core_Region::instance('page-body')->add(array(
+          'template' => "{$templatePath}/CRM/Event/Form/ManageEvent/MultipleParticipantRoleLinks.tpl"
+        ));
       } else {
         $participantrole = '';
         $participantroleHashed = CRM_Utils_Request::retrieve('participantrole', 'String', $form);
