@@ -139,7 +139,7 @@ function multipleparticipantroleforevent_civicrm_buildForm($formName, &$form) {
           $form->_values['event']['default_role_id'] = $participantrole;
           $form->_values['event']['participant_role'] = $allParticipantRoles[$participantrole];
           //Reassign just in case variables were assigned in preproccess
-          $event = $form->get_template_vars('event');
+          $event = $form->getTemplateVars('event');
           $event['participant_role'] = $form->_values['event']['participant_role'];
           $event['default_role_id'] = $form->_values['event']['default_role_id'];
           $form->assign("event", $event);
