@@ -123,9 +123,9 @@ function multipleparticipantroleforevent_civicrm_buildForm($formName, &$form) {
         //and inject into page-body to avoid conflicts
         $templatePath = realpath(dirname(__FILE__)."/templates");
         // dynamically insert a template block in the page
-        CRM_Core_Region::instance('page-body')->add(array(
+        CRM_Core_Region::instance('page-body')->add([
           'template' => "{$templatePath}/CRM/Event/Form/ManageEvent/MultipleParticipantRoleLinks.tpl"
-        ));
+        ]);
       } else {
         $participantrole = '';
         $participantroleHashed = CRM_Utils_Request::retrieve('participantrole', 'String', $form);
